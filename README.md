@@ -47,3 +47,13 @@ The programme name, design, criteria, rating thresholds, action templates and co
 - `index.html` — page structure and content
 - `styles.css` — visual design and responsive layout
 - `app.js` — assessment scoring and action-plan demo logic
+
+## Clickable end-to-end demo flow
+
+1. Open **Start an assessment** and complete all 14 questions.
+2. Select **Generate action plan**. Low-scoring questions are consolidated into one action package per improvement area (rather than one action per question). Each package lists its source question IDs, recommended actions, practical toolkit suggestions, indicative cost breakdowns, priority and target days.
+3. In **Action plan handover**, use the **Housing provider** tab and choose **Submit plan to Energicentrum**.
+4. The demo switches to the **Energicentrum reviewer** tab. Edit the action packages above, add overall feedback, then approve the plan or return it for changes.
+5. Choose **Provider · approved plan** to show the approved-plan view intended for the housing provider. Update implementation statuses to demonstrate progress tracking.
+
+This click-through uses browser localStorage to retain demo state in the same browser. It is not a multi-user application: separate people/devices cannot see the same submission. Do not enter personal or confidential information. The reviewer role is a simulated view, not authenticated access. A production release still requires a secure backend/database, user accounts, server-side permissions, notifications and an audit trail. The demo's cost ranges are indicative and need local validation.

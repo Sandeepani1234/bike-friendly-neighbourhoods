@@ -40,9 +40,9 @@ function renderQuestions(){
       <button class="score-option" data-score="2" aria-pressed="${answers[q.id]===2}">2 · Meets expectations</button>
     </div><input class="evidence-input" type="text" maxlength="240" placeholder="Evidence notes (optional)" aria-label="Evidence notes for question ${q.id}" value="${escapeHtml(evidence[q.id]||"")}">`;
     item.querySelectorAll(".score-option").forEach(btn=>btn.addEventListener("click",()=>{
-      answers[q.id]=Number(btn.dataset.score); item.querySelectorAll(".score-option").forEach(b=>b.setAttribute("aria-pressed",String(b===btn))); updateProgress();
+      answers[q.id]=Number(btn.dataset.score); item.querySelectorAll(".score-option").forEach(b=>b.setAttribute("aria-pressed",String(b===btn))); updateProgress(); saveDemoState();
     }));
-    item.querySelector(".evidence-input").addEventListener("input",e=>evidence[q.id]=e.target.value);
+    item.querySelector(".evidence-input").addEventListener("input",e=>{evidence[q.id]=e.target.value;saveDemoState();});
     list.appendChild(item);
   });
   updateProgress();
@@ -67,45 +67,101 @@ function updateProgress(){
 }
 let planItems = [];
 let workflowStatus = "Draft";
+let activeRole = "provider";
+let overallReviewText = "";
+const demoStoreKey = "bikeFriendlyGotlandDemoV2";
+
+function makeConsolidatedPlan(){
+  const groups = new Map();
+  questions.filter(q => answers[q.id] < 2).forEach(q => {
+    if(!groups.has(q.group)) groups.set(q.group, []);
+    groups.get(q.group).push(q);
+  });
+  planItems = [...groups.entries()].map(([group, qs], idx) => {
+    const worst = Math.min(...qs.map(q => answers[q.id]));
+    const priorities = qs.map(q => answers[q.id] === 0 ? q.priority : answers[q.id] === 1 ? "Medium" : "Low");
+    const priority = priorities.includes("High") ? "High" : priorities.includes("Medium") ? "Medium" : "Low";
+    return {
+      id: idx + 1,
+      title: `${group}: improvement package`,
+      sourceQuestions: qs.map(q => q.id),
+      action: qs.map(q => `Q${q.id}: ${q.action}`).join("\n\n"),
+      toolkit: [...new Set(qs.map(q => q.toolkit))].join("; "),
+      cost: qs.map(q => `Q${q.id}: ${q.cost}`).join("; "),
+      priority: worst === 0 ? priority : (priority === "High" ? "High" : "Low"),
+      deadline: Math.min(...qs.map(q => q.deadline)),
+      status: "Suggested",
+      reviewNote: ""
+    };
+  });
+  if(!planItems.length) planItems = [{id:1,title:"Maintain and monitor current cycling facilities",sourceQuestions:questions.map(q=>q.id),action:"Continue regular inspections, review resident feedback and document maintenance so the current standard is maintained.",toolkit:"Quarterly inspection checklist; maintenance log; resident feedback form",cost:"SEK 0–2,000 per year (indicative; staff time may be additional)",priority:"Low",deadline:90,status:"Suggested",reviewNote:""}];
+}
 function generatePlan(){
   const d=scoreData(), container=document.getElementById("generatedActions");
-  container.innerHTML="";
   if(d.complete<14){
+    container.innerHTML="";
     const missing=questions.filter(q=>answers[q.id]===undefined).map(q=>`Q${q.id}`).join(", ");
     container.innerHTML=`<div class="generated-action"><strong>Complete the assessment first</strong><p>Still unanswered: ${missing}. Blank answers are not counted as zero.</p></div>`;
     return;
   }
-  planItems=questions.filter(q=>answers[q.id]<2).map(q=>({id:q.id,title:`Q${q.id} · ${q.title}`,action:q.action,toolkit:q.toolkit,cost:q.cost,priority:answers[q.id]===0?q.priority:"Low",deadline:q.deadline,status:"Suggested",reviewNote:""}));
-  if(!planItems.length) planItems=[{id:0,title:"Maintain current cycling facilities",action:"Continue inspections and collect resident feedback to maintain the current standard.",toolkit:"Quarterly inspection checklist and resident feedback form",cost:"SEK 0–2,000 per year (indicative)",priority:"Low",deadline:90,status:"Suggested",reviewNote:""}];
-  workflowStatus="Draft";
-  renderPlanItems(); renderWorkflow();
-  showToast(`Suggested action plan created for ${document.getElementById("propertyName").value || "your property"}.`);
+  makeConsolidatedPlan(); workflowStatus="Draft"; activeRole="provider"; overallReviewText="";
+  renderPlanItems(); renderWorkflow(); saveDemoState();
+  showToast(`One consolidated draft plan created for ${document.getElementById("propertyName").value || "your property"}.`);
   document.getElementById("resultPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
 function renderPlanItems(){
  const container=document.getElementById("generatedActions"); container.innerHTML="";
+ if(!planItems.length){container.innerHTML='<div class="generated-action"><strong>No plan yet</strong><p>Answer all 14 questions, then select Generate action plan.</p></div>';return;}
  planItems.forEach((a,i)=>{
   const div=document.createElement("div");div.className="generated-action editable-action";
-  div.innerHTML=`<div class="action-edit-grid"><label>Action title<input data-field="title" data-index="${i}" value="${escapeHtml(a.title)}"></label><label>Priority<select data-field="priority" data-index="${i}"><option ${a.priority==='High'?'selected':''}>High</option><option ${a.priority==='Medium'?'selected':''}>Medium</option><option ${a.priority==='Low'?'selected':''}>Low</option></select></label><label class="wide">Recommended action<textarea data-field="action" data-index="${i}" rows="2">${escapeHtml(a.action)}</textarea></label><label class="wide">Practical toolkit suggestion<textarea data-field="toolkit" data-index="${i}" rows="2">${escapeHtml(a.toolkit)}</textarea></label><label>Indicative cost (SEK)<input data-field="cost" data-index="${i}" value="${escapeHtml(a.cost)}"></label><label>Target in days<input type="number" min="1" max="730" data-field="deadline" data-index="${i}" value="${a.deadline}"></label><label class="wide">Reviewer note<textarea data-field="reviewNote" data-index="${i}" rows="2" placeholder="Energicentrum can add review comments">${escapeHtml(a.reviewNote||"")}</textarea></label></div><p class="cost-caveat">Cost ranges are indicative planning estimates, not supplier quotes. Confirm VAT, installation, site conditions and procurement costs.</p>`;
-  div.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{const field=input.dataset.field;planItems[Number(input.dataset.index)][field]=input.value;renderWorkflow();}));
+  const linked=(a.sourceQuestions||[]).map(id=>`Q${id}`).join(", ");
+  div.innerHTML=`<div class="action-plan-title"><span class="priority ${a.priority.toLowerCase()}">${escapeHtml(a.priority)} PRIORITY</span><strong>${escapeHtml(a.title)}</strong></div><p class="source-questions">Combined from assessment: ${linked}</p><div class="action-edit-grid"><label>Action title<input data-field="title" data-index="${i}" value="${escapeHtml(a.title)}"></label><label>Priority<select data-field="priority" data-index="${i}"><option ${a.priority==='High'?'selected':''}>High</option><option ${a.priority==='Medium'?'selected':''}>Medium</option><option ${a.priority==='Low'?'selected':''}>Low</option></select></label><label class="wide">Recommended action<textarea data-field="action" data-index="${i}" rows="4">${escapeHtml(a.action)}</textarea></label><label class="wide">Practical toolkit / how to do it<textarea data-field="toolkit" data-index="${i}" rows="3">${escapeHtml(a.toolkit)}</textarea></label><label class="wide">Indicative cost breakdown (SEK)<textarea data-field="cost" data-index="${i}" rows="2">${escapeHtml(a.cost)}</textarea></label><label>Target in days<input type="number" min="1" max="730" data-field="deadline" data-index="${i}" value="${a.deadline}"></label><label>Reviewer / implementation note<textarea data-field="reviewNote" data-index="${i}" rows="2" placeholder="Notes from Energicentrum or provider">${escapeHtml(a.reviewNote||"")}</textarea></label></div><p class="cost-caveat">Costs are indicative estimates from the prototype, not supplier quotes. Confirm quantities, VAT, installation, site conditions and procurement costs.</p>`;
+  div.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{const field=input.dataset.field;planItems[Number(input.dataset.index)][field]=input.value;saveDemoState();renderWorkflow();}));
   container.appendChild(div);
  });
 }
+function saveDemoState(){
+ try{localStorage.setItem(demoStoreKey,JSON.stringify({propertyName:document.getElementById("propertyName").value,answers,evidence,planItems,workflowStatus,overallReviewText,activeRole,updatedAt:new Date().toISOString()}));}catch(e){}
+}
+function loadDemoState(){
+ try{const d=JSON.parse(localStorage.getItem(demoStoreKey)||"null");if(!d)return;
+  if(d.propertyName)document.getElementById("propertyName").value=d.propertyName;
+  Object.assign(answers,d.answers||{});Object.assign(evidence,d.evidence||{});planItems=d.planItems||[];workflowStatus=d.workflowStatus||"Draft";overallReviewText=d.overallReviewText||"";activeRole=d.activeRole||"provider";
+ }catch(e){}
+}
 function renderWorkflow(){
  const el=document.getElementById("workflowPanel"); if(!el)return;
- el.innerHTML=`<div class="workflow-head"><div><span class="card-kicker">REVIEW WORKFLOW · DEMO</span><h3>Action plan handover</h3><p>Current status: <b>${escapeHtml(workflowStatus)}</b></p></div><span class="status-pill">${escapeHtml(workflowStatus)}</span></div><p class="workflow-note">In this static prototype, submission and reviewer actions are saved only in this browser. They do not send data to Energicentrum or other users.</p><div class="workflow-buttons"><button class="button" id="submitPlan">Submit for Energicentrum review</button><button class="button button-outline" id="reviewPlan">Reviewer view</button><button class="button button-outline" id="approvePlan">Approve plan (demo)</button><button class="button button-outline" id="returnPlan">Return for changes</button><button class="button button-outline" id="exportPlan">Download plan JSON</button></div><div id="reviewerFields" class="reviewer-fields" ${workflowStatus==='Submitted for review'||workflowStatus==='Under Energicentrum review'||workflowStatus==='Returned for changes'?'':'hidden'}><label>Overall reviewer feedback<textarea id="overallReview" rows="3" placeholder="Add feedback for the housing provider"></textarea></label></div>`;
- document.getElementById("submitPlan").onclick=()=>{workflowStatus="Submitted for review";renderWorkflow();showToast("Demo status updated. No external submission was sent.");};
- document.getElementById("reviewPlan").onclick=()=>{workflowStatus="Under Energicentrum review";renderWorkflow();showToast("Reviewer view enabled in this browser demo.");};
- document.getElementById("approvePlan").onclick=()=>{workflowStatus="Approved (demo only)";renderWorkflow();showToast("Demo approval recorded locally only.");};
- document.getElementById("returnPlan").onclick=()=>{workflowStatus="Returned for changes";renderWorkflow();showToast("Demo plan returned for changes.");};
- document.getElementById("exportPlan").onclick=()=>{const packet={propertyName:document.getElementById("propertyName").value,score:scoreData(),answers,evidence,actions:planItems,status:workflowStatus,reviewerFeedback:document.getElementById("overallReview")?.value||"",createdAt:new Date().toISOString(),prototypeNotice:"Export only; not transmitted to Energicentrum."};const blob=new Blob([JSON.stringify(packet,null,2)],{type:"application/json"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="bike-friendly-action-plan.json";a.click();URL.revokeObjectURL(url);};
+ const submitted=["Submitted for review","Under Energicentrum review","Returned for changes","Approved","Published"].includes(workflowStatus);
+ const isApproved=["Approved","Published"].includes(workflowStatus);
+ const tabs=`<div class="role-tabs" aria-label="Demo role navigation"><button class="${activeRole==='provider'?'active':''}" id="roleProvider">Housing provider</button><button class="${activeRole==='reviewer'?'active':''}" id="roleReviewer">Energicentrum reviewer</button><button class="${activeRole==='approved'?'active':''}" id="roleApproved">Provider · approved plan</button></div>`;
+ let body='';
+ if(activeRole==='provider'){
+  body=`<div class="workflow-head"><div><span class="card-kicker">HOUSING PROVIDER WORKSPACE</span><h3>${escapeHtml(document.getElementById("propertyName").value||"My property")}</h3><p>Review your consolidated draft before sending it to Energicentrum.</p></div><span class="status-pill">${escapeHtml(workflowStatus)}</span></div><div class="workflow-summary"><b>${planItems.length}</b><span>combined action packages</span><b>${scoreData().total}/28</b><span>provisional score</span></div><p class="workflow-note">Actions are grouped by improvement area, and each package lists the assessment questions that triggered it. Edit your draft above, then submit for review.</p><div class="workflow-buttons"><button class="button" id="submitPlan" ${planItems.length?'':'disabled'}>Submit plan to Energicentrum ↗</button><button class="button button-outline" id="exportPlan">Download plan JSON</button></div>${workflowStatus==='Returned for changes'?`<div class="review-feedback"><b>Energicentrum feedback</b><p>${escapeHtml(overallReviewText||'Please review the action notes and resubmit.')}</p></div>`:''}<p class="workflow-note">Demo mode: state is saved in this browser only. It is not shared with a separate Energicentrum account.</p>`;
+ } else if(activeRole==='reviewer'){
+  body=`<div class="workflow-head"><div><span class="card-kicker">ENERGICENTRUM · REVIEW QUEUE</span><h3>Review submitted action plan</h3><p>${escapeHtml(document.getElementById("propertyName").value||"My property")} · ${scoreData().total}/28 provisional points</p></div><span class="status-pill">${escapeHtml(workflowStatus)}</span></div>${!submitted?'<div class="review-feedback"><b>No submission in queue yet</b><p>Go to the Housing provider tab and submit the generated plan first. For this clickable demo, you can still preview the review actions below.</p></div>':''}<div class="reviewer-fields"><label>Overall review feedback<textarea id="overallReview" rows="3" placeholder="Explain approval, requested changes, or evidence still needed">${escapeHtml(overallReviewText)}</textarea></label></div><p class="workflow-note">Review each editable action above. Your edits, costs, toolkit suggestions and notes form the proposed final plan.</p><div class="workflow-buttons"><button class="button" id="approvePlan" ${submitted?"":"disabled"}>Approve plan ✓</button><button class="button button-outline" id="returnPlan" ${submitted?"":"disabled"}>Return to provider for changes</button><button class="button button-outline" id="exportPlan">Download review JSON</button></div><p class="workflow-note">Prototype limitation: reviewer permissions are simulated; this is not a secure administrator account.</p>`;
+ } else {
+  body=`<div class="workflow-head"><div><span class="card-kicker">HOUSING PROVIDER · FINAL PLAN</span><h3>${isApproved?'Energicentrum-approved action plan':'Approved plan preview'}</h3><p>${escapeHtml(document.getElementById("propertyName").value||"My property")}</p></div><span class="status-pill">${escapeHtml(workflowStatus)}</span></div>${isApproved?`<div class="approval-banner"><strong>✓ Approved by Energicentrum (demo)</strong><p>${escapeHtml(overallReviewText||'The action plan has been approved in this prototype.')}</p></div>`:'<div class="review-feedback"><b>Not approved yet</b><p>Submit the draft and use the Energicentrum reviewer tab to approve it. This screen will then show the approved version.</p></div>'}<div class="provider-final-actions">${planItems.map((a,i)=>`<article class="final-action"><div class="final-action-top"><span class="priority ${String(a.priority).toLowerCase()}">${escapeHtml(a.priority)} PRIORITY</span><span class="final-action-deadline">Target: ${escapeHtml(a.deadline)} days</span></div><h4>${escapeHtml(a.title)}</h4><p>${escapeHtml(a.action).replace(/\n/g,'<br>')}</p><div><b>Toolkit / how to implement</b><p>${escapeHtml(a.toolkit)}</p></div><div><b>Indicative cost (SEK)</b><p>${escapeHtml(a.cost)}</p></div>${a.reviewNote?`<div><b>Review / implementation note</b><p>${escapeHtml(a.reviewNote)}</p></div>`:''}<label class="progress-select">Implementation status<select data-progress="${i}"><option ${a.implementationStatus==='Not started'||!a.implementationStatus?'selected':''}>Not started</option><option ${a.implementationStatus==='In progress'?'selected':''}>In progress</option><option ${a.implementationStatus==='Completed'?'selected':''}>Completed</option><option ${a.implementationStatus==='Needs support'?'selected':''}>Needs support</option></select></label></article>`).join('')}</div><div class="workflow-buttons"><button class="button button-outline" id="exportPlan">Download final plan JSON</button></div><p class="workflow-note">This final-plan view is intended for the housing provider. It is not a householder portal. Demo approval does not constitute official Energicentrum approval.</p>`;
+ }
+ el.innerHTML=`${tabs}<div class="workflow-role-content">${body}</div>`;
+ document.getElementById("roleProvider").onclick=()=>{activeRole='provider';renderWorkflow();saveDemoState();};
+ document.getElementById("roleReviewer").onclick=()=>{activeRole='reviewer';workflowStatus=workflowStatus==='Submitted for review'?'Under Energicentrum review':workflowStatus;renderWorkflow();saveDemoState();};
+ document.getElementById("roleApproved").onclick=()=>{activeRole='approved';renderWorkflow();saveDemoState();};
+ const feedback=document.getElementById('overallReview');if(feedback)feedback.addEventListener('input',()=>{overallReviewText=feedback.value;saveDemoState();});
+ const submit=document.getElementById('submitPlan');if(submit)submit.onclick=()=>{workflowStatus='Submitted for review';activeRole='reviewer';renderWorkflow();saveDemoState();showToast('Submitted in the local demo. Switches to Energicentrum review.');};
+ const approve=document.getElementById('approvePlan');if(approve)approve.onclick=()=>{overallReviewText=document.getElementById('overallReview')?.value||overallReviewText;workflowStatus='Approved';activeRole='approved';renderWorkflow();saveDemoState();showToast('Plan approved in the clickable demo.');};
+ const ret=document.getElementById('returnPlan');if(ret)ret.onclick=()=>{overallReviewText=document.getElementById('overallReview')?.value||'';workflowStatus='Returned for changes';activeRole='provider';renderWorkflow();saveDemoState();showToast('Plan returned to the housing provider in the demo.');};
+ const exp=document.getElementById('exportPlan');if(exp)exp.onclick=()=>{const packet={propertyName:document.getElementById('propertyName').value,score:scoreData(),answers,evidence,actions:planItems,status:workflowStatus,reviewerFeedback:overallReviewText,createdAt:new Date().toISOString(),prototypeNotice:'Local clickable demonstration only. Not transmitted to Energicentrum.'};const blob=new Blob([JSON.stringify(packet,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bike-friendly-action-plan.json';a.click();URL.revokeObjectURL(url);};
+ el.querySelectorAll('[data-progress]').forEach(sel=>{sel.value=sel.dataset.value||'Not started';sel.addEventListener('change',()=>{const i=Number(sel.dataset.progress);planItems[i].implementationStatus=sel.value;saveDemoState();showToast('Implementation progress updated in this browser.');});});
 }
 function openAssessment(){if(!dialog.open)dialog.showModal();}
 function showToast(message){toast.textContent=message;toast.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("visible"),3200);}
 ["startTop","startHero","startAssessment","startBottom","openAssessment"].forEach(id=>document.getElementById(id).addEventListener("click",openAssessment));
 document.getElementById("closeDialog").addEventListener("click",()=>dialog.close());
 document.getElementById("showPlan").addEventListener("click",generatePlan);
-document.getElementById("resetAssessment").addEventListener("click",()=>{Object.keys(answers).forEach(k=>delete answers[k]);Object.keys(evidence).forEach(k=>delete evidence[k]);renderQuestions();document.getElementById("generatedActions").innerHTML="";updateProgress();showToast("Assessment reset.");});
+document.getElementById("propertyName").addEventListener("input",()=>saveDemoState());
+document.getElementById("resetAssessment").addEventListener("click",()=>{Object.keys(answers).forEach(k=>delete answers[k]);Object.keys(evidence).forEach(k=>delete evidence[k]);planItems=[];workflowStatus="Draft";activeRole="provider";overallReviewText="";renderQuestions();renderPlanItems();renderWorkflow();updateProgress();saveDemoState();showToast("Assessment reset.");});
 document.getElementById("menuToggle").addEventListener("click",()=>{const nav=document.getElementById("nav"),isOpen=nav.classList.toggle("open");document.getElementById("menuToggle").setAttribute("aria-expanded",String(isOpen));});
 document.querySelectorAll("#nav a").forEach(a=>a.addEventListener("click",()=>document.getElementById("nav").classList.remove("open")));
+loadDemoState();
 renderQuestions();
+if(planItems.length){renderPlanItems();renderWorkflow();} else {renderWorkflow();}
