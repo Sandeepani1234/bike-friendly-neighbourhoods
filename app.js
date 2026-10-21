@@ -1,316 +1,167 @@
-(() => {
-"use strict";
-
-const STORAGE_KEY = "bfnDemoStateV2";
-const PROFILE_KEY = "bfnProviderProfileV1";
-
 const questions = [
-  {area:"Cycling access",title:"Are everyday destinations easy to reach by bicycle?",help:"Consider shops, schools, services and public transport.",actions:["Map everyday destinations and identify missing cycling links.","Coordinate with the municipality on safe connections to key destinations."]},
-  {area:"Cycling access",title:"Are routes to public transport convenient and safe?",help:"Consider stations, bus stops, crossings and last-mile connections.",actions:["Audit cycling routes to nearby public transport stops.","Prioritise missing links and safer crossings with the municipality."]},
-  {area:"Cycling access",title:"Are cycling routes continuous and easy to navigate?",help:"Look for gaps, confusing junctions and route barriers.",actions:["Map route gaps and confusing junctions.","Install clear wayfinding to local destinations and cycle routes."]},
-  {area:"Bicycle parking",title:"Is there enough bicycle parking near entrances?",help:"Think about capacity, location, weather protection and everyday convenience.",actions:["Survey parking demand and add secure stands near entrances.","Provide covered bicycle parking close to building entrances."]},
-  {area:"Bicycle parking",title:"Is secure bicycle storage available to residents?",help:"Consider access control, lighting, space and perceived safety.",actions:["Review secure storage access and resident demand.","Upgrade storage security, lighting and access where needed."]},
-  {area:"Bicycle parking",title:"Is bicycle parking accessible for different bicycle types?",help:"Consider cargo bikes, e-bikes, child seats and adapted cycles.",actions:["Check parking layout for cargo bikes and adapted cycles.","Create a mix of standard and larger bicycle spaces."]},
-  {area:"Safety and comfort",title:"Do residents feel safe cycling in and around the area?",help:"Use resident feedback, audits and known conflict points.",actions:["Run a resident safety survey and evening route audit.","Work with the municipality to address identified conflict points."]},
-  {area:"Safety and comfort",title:"Are walking and cycling routes well lit?",help:"Consider entrances, paths, parking and winter conditions.",actions:["Audit lighting on paths and at bicycle parking.","Improve lighting at dark routes, entrances and storage areas."]},
-  {area:"Safety and comfort",title:"Are crossings and junctions easy to use?",help:"Consider visibility, speed, priority and accessibility.",actions:["Identify difficult crossings and document barriers.","Raise priority crossing improvements with the responsible road owner."]},
-  {area:"Safety and comfort",title:"Are cycling routes maintained throughout the year?",help:"Consider snow clearance, leaves, surface quality and drainage.",actions:["Agree on a seasonal maintenance checklist with responsible teams.","Track surface defects, drainage and winter maintenance issues."]},
-  {area:"Services and support",title:"Can residents access basic bicycle repair facilities?",help:"Consider pumps, tools, repair partners and service information.",actions:["Install a shared pump and basic repair stand.","Partner with a local bicycle repair service for resident support."]},
-  {area:"Services and support",title:"Are residents informed about cycling options and routes?",help:"Consider welcome packs, noticeboards, maps and digital channels.",actions:["Create a simple cycling information page and resident guide.","Share local route maps and practical cycling information."]},
-  {area:"Services and support",title:"Are residents encouraged to share feedback on cycling?",help:"Consider surveys, meetings, tenant forums and follow-up.",actions:["Add cycling questions to resident feedback channels.","Hold a resident walk-and-cycle audit and publish actions."]},
-  {area:"Services and support",title:"Is there a plan to monitor cycling improvements?",help:"Consider responsibilities, targets, budget and review dates.",actions:["Assign an owner and simple indicators for each improvement.","Set an annual review of cycling facilities and resident feedback."]}
+  {id:1,group:"Convenient bicycle parking",title:"Is there sufficient bicycle parking for residents?",help:"Consider the number of spaces compared with observed demand.",action:"Measure parking demand and occupancy, then assess whether additional bicycle spaces are needed.",toolkit:"Parking occupancy count sheet, resident survey, floor/site plan",cost:"SEK 0–2,000",priority:"Medium",deadline:30},
+  {id:2,group:"Convenient bicycle parking",title:"Is bicycle parking convenient to reach and use?",help:"Think about access routes, location, layout and signs.",action:"Review the parking layout, access route, positioning and signs; prepare practical improvements.",toolkit:"Wayfinding signs, floor markings, simple access audit checklist",cost:"SEK 500–5,000",priority:"Medium",deadline:60},
+  {id:3,group:"Security",title:"Can residents lock their bicycles securely?",help:"Check whether suitable, usable locking points are available.",action:"Review rack design and add suitable locking points if necessary.",toolkit:"Sheffield-style stands or equivalent secure racks; installation quote",cost:"SEK 1,500–4,000 per stand installed (indicative)",priority:"High",deadline:60},
+  {id:4,group:"Security",title:"Is the parking area sufficiently lit and maintained?",help:"Look for lighting gaps, damage and maintenance issues.",action:"Inspect the area, prioritise maintenance faults and schedule repairs or lighting improvements.",toolkit:"Inspection checklist, LED lighting review, maintenance work order",cost:"SEK 500–5,000 for minor fixes; lighting requires quote",priority:"High",deadline:30},
+  {id:5,group:"Weather protection & accessibility",title:"Is covered bicycle parking available where appropriate?",help:"Consider local need, available space and feasibility.",action:"Assess resident demand, available space and feasibility before selecting covered parking options.",toolkit:"Covered rack / shelter options, site feasibility check, supplier quote",cost:"SEK 20,000–100,000+ per shelter (site-dependent estimate)",priority:"Low",deadline:90},
+  {id:6,group:"Weather protection & accessibility",title:"Can residents with different needs use the parking and access routes?",help:"Identify practical barriers in routes and parking arrangements.",action:"Conduct an access review and plan to remove practical barriers within the provider’s control.",toolkit:"Accessibility checklist, route measurements, minor surfacing/signage fixes",cost:"SEK 0–10,000 for audit/minor fixes; construction needs quote",priority:"High",deadline:60},
+  {id:7,group:"Bicycle maintenance",title:"Can residents access a pump and basic repair tools?",help:"An approved equivalent repair service may also meet the need.",action:"Compare a basic pump-and-tool kit with a shared repair point, based on demand and budget.",toolkit:"Public bike pump, basic repair tools, mounting post and simple instructions",cost:"SEK 1,500–6,000 for a basic shared kit (indicative)",priority:"Medium",deadline:60},
+  {id:8,group:"Bicycle maintenance",title:"Is there a clear process for reporting damaged facilities?",help:"Residents should know where to report problems and what happens next.",action:"Create a visible fault-reporting route and assign responsibility for follow-up.",toolkit:"QR code / web form, noticeboard sign, response-time checklist",cost:"SEK 0–1,500 using existing digital tools",priority:"Medium",deadline:30},
+  {id:9,group:"Resident information",title:"Are residents informed about available bicycle facilities?",help:"Check welcome packs, noticeboards, website pages and other channels.",action:"Create a bicycle-facilities guide for the website, welcome pack or noticeboard.",toolkit:"One-page resident guide, map, welcome-pack insert or noticeboard poster",cost:"SEK 0–2,000 using existing channels",priority:"Low",deadline:30},
+  {id:10,group:"Resident information",title:"Does the provider encourage residents to use the facilities?",help:"Consider relevant communication, activities or seasonal information.",action:"Prepare a useful seasonal cycling information campaign or small resident activity.",toolkit:"Seasonal email/poster template, short resident event checklist",cost:"SEK 0–5,000 depending on event and printing",priority:"Low",deadline:60},
+  {id:11,group:"Additional cycling support",title:"Are additional services available where residents need them?",help:"Examples include shared bicycles, cargo bikes or a repair partnership.",action:"Survey resident demand for shared bicycles, cargo bikes or a repair partnership before choosing a service.",toolkit:"Resident survey, local bike-shop partnership brief, shared-bike pilot checklist",cost:"SEK 0–3,000 for research; service cost requires quote",priority:"Low",deadline:90},
+  {id:12,group:"Additional cycling support",title:"Does the provider collect resident feedback about cycling facilities?",help:"Feedback should be collected and reviewed in a clear way.",action:"Introduce a short resident feedback form and define when responses will be reviewed.",toolkit:"Short online survey, QR code, annual feedback review template",cost:"SEK 0–1,000 using existing tools",priority:"Low",deadline:60},
+  {id:13,group:"Management & improvement",title:"Is a person or team responsible for bicycle facilities?",help:"Responsibilities and a contact route should be documented.",action:"Assign a responsible role and publish contact and reporting information.",toolkit:"Responsibility matrix, contact card, maintenance escalation flow",cost:"SEK 0–1,000 staff time/materials",priority:"Medium",deadline:30},
+  {id:14,group:"Management & improvement",title:"Does the provider review facilities and plan improvements?",help:"Look for a documented inspection and follow-up process.",action:"Create a scheduled inspection checklist and a regular improvement review.",toolkit:"Quarterly inspection checklist, action tracker, annual review meeting",cost:"SEK 0–2,000 using existing tools",priority:"Low",deadline:90}
 ];
-
-const $ = id => document.getElementById(id);
-let state = loadState();
-let profile = loadProfile();
-let activeTab = "provider";
+const answers = {};
+const evidence = {};
+const dialog = document.getElementById("assessmentDialog");
+const list = document.getElementById("questionList");
+const toast = document.getElementById("toast");
 let toastTimer;
 
-function defaultState() {
-  return {propertyName:"",answers:{},notes:{},planItems:[],workflowStatus:"Not started",reviewFeedback:"",reviewerName:"Energicentrum reviewer",lastUpdated:null};
-}
-function loadState() {
-  try { return {...defaultState(), ...(JSON.parse(localStorage.getItem(STORAGE_KEY)) || {})}; }
-  catch { return defaultState(); }
-}
-function loadProfile() {
-  try { return JSON.parse(localStorage.getItem(PROFILE_KEY) || "null"); }
-  catch { return null; }
-}
-function persist() {
-  state.lastUpdated = new Date().toISOString();
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-  catch { showToast("Browser storage is unavailable; changes may not persist."); }
-  updateDashboardStatuses();
-}
-function persistProfile() {
-  try { localStorage.setItem(PROFILE_KEY, JSON.stringify(profile)); return true; }
-  catch { showToast("Could not save profile in this browser."); return false; }
-}
-function showToast(message) {
-  const el = $("toast"); el.textContent = message; el.classList.add("show");
-  clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2800);
-}
-function openDialog(dialog) { if (!dialog.open) dialog.showModal(); }
-function closeDialog(dialog) { if (dialog.open) dialog.close(); }
-
-function openProviderPortal() {
-  if (profile) showDashboard(); else showRegistration();
-  openDialog($("providerDialog"));
-}
-function showRegistration() {
-  $("providerRegistrationForm").hidden = false;
-  $("providerDashboard").hidden = true;
-  $("providerDialogTitle").textContent = profile ? "Edit organisation profile" : "Register your organisation";
-  const p = profile || {};
-  $("orgName").value = p.organisation || "";
-  $("orgType").value = p.organisationType || "Municipal housing company";
-  $("orgProperties").value = p.properties || "1–5";
-  $("orgContact").value = p.contact || "";
-  $("orgEmail").value = p.email || "";
-  $("orgPhone").value = p.phone || "";
-  $("orgLocation").value = p.municipality || "";
-}
-function showDashboard() {
-  if (!profile) return showRegistration();
-  $("providerRegistrationForm").hidden = true;
-  $("providerDashboard").hidden = false;
-  $("providerDialogTitle").textContent = "Housing provider dashboard";
-  $("dashboardOrgName").textContent = profile.organisation;
-  $("providerAvatar").textContent = (profile.organisation || "H").trim().charAt(0).toUpperCase();
-  $("dashboardOrgDetails").textContent = `${profile.organisationType} · ${profile.municipality} · ${profile.properties} properties`;
-  $("dashboardContact").textContent = `${profile.contact} · ${profile.email}${profile.phone ? " · " + profile.phone : ""}`;
-  updateDashboardStatuses();
-}
-function updateDashboardStatuses() {
-  if (!$("dashboardAssessmentStatus")) return;
-  const answered = Object.keys(state.answers).length;
-  $("dashboardAssessmentStatus").textContent = state.planItems.length
-    ? `${answered}/14 questions answered · Plan generated`
-    : answered ? `${answered}/14 questions answered · Draft in progress`
-    : "No assessment started yet.";
-  $("dashboardReviewStatus").textContent = state.planItems.length
-    ? `Status: ${state.workflowStatus}. ${state.planItems.length} action package(s).`
-    : "Complete the assessment to generate an action plan.";
-}
-
-function renderQuestions() {
-  const list = $("questionList");
+function renderQuestions(){
   list.innerHTML = "";
-  questions.forEach((q, i) => {
-    const card = document.createElement("article");
-    card.className = "question-card";
-    const head = document.createElement("div"); head.className = "question-head";
-    const num = document.createElement("span"); num.className = "question-number"; num.textContent = String(i+1).padStart(2,"0");
-    const copy = document.createElement("div");
-    const title = document.createElement("h3"); title.textContent = q.title;
-    const help = document.createElement("p"); help.textContent = `${q.area} · ${q.help}`;
-    copy.append(title, help); head.append(num, copy); card.append(head);
-    const ratings = document.createElement("div"); ratings.className = "rating-options"; ratings.setAttribute("role","radiogroup"); ratings.setAttribute("aria-label",q.title);
-    ["1","2","3","4","5"].forEach(n => {
-      const label = document.createElement("label");
-      const input = document.createElement("input"); input.type = "radio"; input.name = `q${i}`; input.value = n;
-      input.checked = Number(state.answers[i]) === Number(n);
-      input.addEventListener("change", () => { state.answers[i] = Number(n); persist(); updateScore(); });
-      label.append(input, document.createTextNode(`${n} ${["","Poor","Weak","Fair","Good","Excellent"][Number(n)]}`)); ratings.append(label);
-    });
-    const note = document.createElement("textarea"); note.placeholder = "Evidence notes (optional): observations, resident feedback, plans…"; note.setAttribute("aria-label",`Evidence notes for question ${i+1}`); note.value = state.notes[i] || "";
-    note.addEventListener("input", () => { state.notes[i] = note.value; persist(); });
-    card.append(ratings, note); list.append(card);
+  let previousGroup = "";
+  questions.forEach(q=>{
+    if(q.group !== previousGroup){
+      const heading=document.createElement("div");
+      heading.className="question-group-heading";
+      heading.innerHTML=`<div class="eyebrow">${q.group}</div>`;
+      list.appendChild(heading);
+      previousGroup=q.group;
+    }
+    const item=document.createElement("section");
+    item.className="question-group";
+    item.innerHTML=`<h4>Q${q.id}. ${q.title}</h4><p>${q.help}</p><div class="question-controls" role="group" aria-label="Score question ${q.id}">
+      <button class="score-option" data-score="0" aria-pressed="${answers[q.id]===0}">0 · Needs work</button>
+      <button class="score-option" data-score="1" aria-pressed="${answers[q.id]===1}">1 · Partly meets</button>
+      <button class="score-option" data-score="2" aria-pressed="${answers[q.id]===2}">2 · Meets expectations</button>
+    </div><input class="evidence-input" type="text" maxlength="240" placeholder="Evidence notes (optional)" aria-label="Evidence notes for question ${q.id}" value="${escapeHtml(evidence[q.id]||"")}">`;
+    item.querySelectorAll(".score-option").forEach(btn=>btn.addEventListener("click",()=>{
+      answers[q.id]=Number(btn.dataset.score); item.querySelectorAll(".score-option").forEach(b=>b.setAttribute("aria-pressed",String(b===btn))); updateProgress(); saveDemoState();
+    }));
+    item.querySelector(".evidence-input").addEventListener("input",e=>{evidence[q.id]=e.target.value;saveDemoState();});
+    list.appendChild(item);
   });
-  $("propertyName").value = state.propertyName || "";
-  $("propertyName").addEventListener("input", () => { state.propertyName = $("propertyName").value; persist(); });
-  updateScore();
+  updateProgress();
 }
-function updateScore() {
-  const vals = Object.values(state.answers).map(Number).filter(n => n >= 1 && n <= 5);
-  const avg = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : 0;
-  $("liveScore").textContent = vals.length ? avg.toFixed(1) : "—";
-  $("assessmentProgress").style.width = `${(vals.length/questions.length)*100}%`;
-  $("progressLabel").textContent = `${vals.length} of ${questions.length} answered`;
+function escapeHtml(value){return String(value).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function scoreData(){
+  const values=Object.values(answers), total=values.reduce((sum,v)=>sum+v,0), complete=values.length;
+  const pct=Math.round(total/28*100);
+  const stars=complete===14?(pct<20?1:pct<40?2:pct<60?3:pct<80?4:5):0;
+  return {total,complete,pct,stars};
 }
-function openAssessment() {
-  $("propertyName").value = state.propertyName || (profile && profile.organisation) || "";
-  renderQuestions();
-  if (state.planItems.length) {
-    $("workflowPanel").hidden = false;
-    renderWorkflow();
-  }
-  openDialog($("assessmentDialog"));
+function updateProgress(){
+  const d=scoreData(), pct=Math.round(d.complete/14*100);
+  document.getElementById("progressText").textContent=`${d.complete} of 14 answered`;
+  document.getElementById("progressPercent").textContent=`${pct}%`;
+  document.getElementById("progressBar").style.width=`${pct}%`;
+  const result=document.getElementById("resultRating");
+  const summary=document.getElementById("resultSummary");
+  document.getElementById("resultScore").innerHTML=`${d.total}<small> / 28</small>`;
+  if(d.complete===14){result.textContent=`${"★".repeat(d.stars)}${"☆".repeat(5-d.stars)} · ${d.stars} star${d.stars===1?"":"s"}`;summary.textContent=`${d.total} of 28 points · ${d.pct}% provisional score. Awaiting administrator review.`;}
+  else{result.textContent="Not yet rated";summary.textContent=`${d.complete} answers complete. Answer all questions to calculate a provisional rating.`;}
 }
-function saveDraft() {
-  state.propertyName = $("propertyName").value.trim();
-  persist();
-  $("assessmentMessage").textContent = "Draft saved in this browser.";
-  showToast("Assessment draft saved.");
-}
-function generatePlan() {
-  state.propertyName = $("propertyName").value.trim();
-  const answered = Object.keys(state.answers).length;
-  if (answered < questions.length) {
-    const proceed = confirm(`You have answered ${answered} of ${questions.length} questions. Generate a provisional plan using the answers so far?`);
-    if (!proceed) return;
-  }
-  const grouped = {};
-  questions.forEach((q,i) => {
-    const score = Number(state.answers[i] || 0);
-    if (!score || score >= 4) return;
-    if (!grouped[q.area]) grouped[q.area] = {area:q.area, scores:[], titles:[], recommendations:[], notes:[]};
-    grouped[q.area].scores.push(score);
-    grouped[q.area].titles.push(q.title);
-    grouped[q.area].recommendations.push(q.actions[score <= 2 ? 0 : 1]);
-    if (state.notes[i]) grouped[q.area].notes.push(state.notes[i]);
+let planItems = [];
+let workflowStatus = "Draft";
+let activeRole = "provider";
+let overallReviewText = "";
+const demoStoreKey = "bikeFriendlyGotlandDemoV2";
+
+function makeConsolidatedPlan(){
+  const groups = new Map();
+  questions.filter(q => answers[q.id] < 2).forEach(q => {
+    if(!groups.has(q.group)) groups.set(q.group, []);
+    groups.get(q.group).push(q);
   });
-  state.planItems = Object.values(grouped).map((g,index) => {
-    const avg = g.scores.reduce((a,b)=>a+b,0)/g.scores.length;
-    const priority = avg <= 2 ? "High" : "Medium";
+  planItems = [...groups.entries()].map(([group, qs], idx) => {
+    const worst = Math.min(...qs.map(q => answers[q.id]));
+    const priorities = qs.map(q => answers[q.id] === 0 ? q.priority : answers[q.id] === 1 ? "Medium" : "Low");
+    const priority = priorities.includes("High") ? "High" : priorities.includes("Medium") ? "Medium" : "Low";
     return {
-      id:`action-${index+1}`, area:g.area, title:`Improve ${g.area.toLowerCase()}`,
-      basedOn:g.titles, recommendations:[...new Set(g.recommendations)],
-      evidence:g.notes.join(" | "), priority,
-      toolkit: g.area === "Bicycle parking" ? "Parking demand checklist and secure storage guide" : g.area === "Safety and comfort" ? "Walk-and-cycle audit checklist" : "Neighbourhood cycling improvement toolkit",
-      cost: g.area === "Bicycle parking" ? "25,000–80,000 SEK" : g.area === "Safety and comfort" ? "10,000–60,000 SEK" : g.area === "Cycling access" ? "10,000–50,000 SEK" : "5,000–20,000 SEK",
-      targetDate: `${new Date().getFullYear()}-12-31`,
-      reviewerRecommendation:"", reviewerFeedback:"", implementationStatus:"Not started"
+      id: idx + 1,
+      title: `${group}: improvement package`,
+      sourceQuestions: qs.map(q => q.id),
+      action: qs.map(q => `Q${q.id}: ${q.action}`).join("\n\n"),
+      toolkit: [...new Set(qs.map(q => q.toolkit))].join("; "),
+      cost: qs.map(q => `Q${q.id}: ${q.cost}`).join("; "),
+      priority: worst === 0 ? priority : (priority === "High" ? "High" : "Low"),
+      deadline: Math.min(...qs.map(q => q.deadline)),
+      status: "Suggested",
+      reviewNote: ""
     };
   });
-  if (!state.planItems.length) {
-    state.planItems = [{id:"action-1",area:"Continuous improvement",title:"Maintain and monitor cycling facilities",basedOn:["All assessment answers were rated 4 or 5, or no answers were provided."],recommendations:["Maintain a regular review of bicycle parking, route quality and resident feedback.","Record a baseline and revisit the assessment annually."],evidence:"",priority:"Low",toolkit:"Annual neighbourhood review checklist",cost:"5,000–15,000 SEK",targetDate:`${new Date().getFullYear()+1}-06-30`,reviewerRecommendation:"",reviewerFeedback:"",implementationStatus:"Not started"}];
+  if(!planItems.length) planItems = [{id:1,title:"Maintain and monitor current cycling facilities",sourceQuestions:questions.map(q=>q.id),action:"Continue regular inspections, review resident feedback and document maintenance so the current standard is maintained.",toolkit:"Quarterly inspection checklist; maintenance log; resident feedback form",cost:"SEK 0–2,000 per year (indicative; staff time may be additional)",priority:"Low",deadline:90,status:"Suggested",reviewNote:""}];
+}
+function generatePlan(){
+  const d=scoreData(), container=document.getElementById("generatedActions");
+  if(d.complete<14){
+    container.innerHTML="";
+    const missing=questions.filter(q=>answers[q.id]===undefined).map(q=>`Q${q.id}`).join(", ");
+    container.innerHTML=`<div class="generated-action"><strong>Complete the assessment first</strong><p>Still unanswered: ${missing}. Blank answers are not counted as zero.</p></div>`;
+    return;
   }
-  state.workflowStatus = "Draft";
-  state.reviewFeedback = "";
-  persist();
-  $("workflowPanel").hidden = false;
-  renderWorkflow();
-  $("assessmentMessage").textContent = "Combined action plan generated. Review the packages below.";
-  $("workflowPanel").scrollIntoView({behavior:"smooth",block:"start"});
+  makeConsolidatedPlan(); workflowStatus="Draft"; activeRole="provider"; overallReviewText="";
+  renderPlanItems(); renderWorkflow(); saveDemoState();
+  showToast(`One consolidated draft plan created for ${document.getElementById("propertyName").value || "your property"}.`);
+  document.getElementById("resultPanel").scrollIntoView({behavior:"smooth",block:"nearest"});
 }
-function renderPlanItems(container, mode) {
-  container.innerHTML = "";
-  if (!state.planItems.length) { container.innerHTML = '<div class="empty-state">No action plan yet. Complete the assessment and generate a plan.</div>'; return; }
-  state.planItems.forEach((item, idx) => {
-    const article = document.createElement("article"); article.className = "action-item";
-    const row = document.createElement("div"); row.className = "action-title-row";
-    const titleWrap = document.createElement("div"); const title = document.createElement("h3"); title.textContent = item.title;
-    const subtitle = document.createElement("p"); subtitle.textContent = `${item.area} · Based on ${item.basedOn.length} assessment finding(s)`;
-    titleWrap.append(title, subtitle);
-    const tag = document.createElement("span"); tag.className = `tag ${item.priority.toLowerCase()}`; tag.textContent = `${item.priority} priority`;
-    row.append(titleWrap, tag); article.append(row);
-    item.recommendations.forEach(rec => { const p = document.createElement("p"); p.textContent = `• ${rec}`; article.append(p); });
-    const meta = document.createElement("div"); meta.className = "action-meta";
-    [`Indicative cost: ${item.cost}`,`Target: ${item.targetDate}`,`Toolkit: ${item.toolkit}`].forEach(t => {const s=document.createElement("span");s.className="tag";s.textContent=t;meta.append(s);});
-    article.append(meta);
-    if (item.evidence) {const evidence=document.createElement("p"); evidence.textContent=`Evidence notes: ${item.evidence}`; article.append(evidence);}
-    const status = document.createElement("p"); status.textContent = `Implementation status: ${item.implementationStatus}`; article.append(status);
-    if (mode === "reviewer") {
-      const recLabel = document.createElement("label"); recLabel.className="review-field"; recLabel.textContent="Reviewer recommendation (optional)";
-      const recInput = document.createElement("textarea"); recInput.value=item.reviewerRecommendation||""; recInput.placeholder="Suggested changes or improvements…";
-      recInput.addEventListener("change",()=>{item.reviewerRecommendation=recInput.value;persist();});
-      recLabel.append(recInput); article.append(recLabel);
-      const feedbackLabel = document.createElement("label"); feedbackLabel.className="review-field"; feedbackLabel.textContent="Reviewer feedback";
-      const feedback = document.createElement("textarea"); feedback.value=item.reviewerFeedback||""; feedback.placeholder="Explain what is approved or what needs changing…";
-      feedback.addEventListener("change",()=>{item.reviewerFeedback=feedback.value;persist();});
-      feedbackLabel.append(feedback); article.append(feedbackLabel);
-      const dateLabel=document.createElement("label");dateLabel.className="review-field";dateLabel.textContent="Target date";
-      const date=document.createElement("input");date.type="date";date.value=item.targetDate||"";date.addEventListener("change",()=>{item.targetDate=date.value;persist();});dateLabel.append(date);article.append(dateLabel);
-      const priorityLabel=document.createElement("label");priorityLabel.className="review-field";priorityLabel.textContent="Priority";
-      const priority=document.createElement("select");["High","Medium","Low"].forEach(p=>{const o=document.createElement("option");o.value=p;o.textContent=p;priority.append(o);});priority.value=item.priority;priority.addEventListener("change",()=>{item.priority=priority.value;persist();renderWorkflow();});priorityLabel.append(priority);article.append(priorityLabel);
-    }
-    if (mode === "approved") {
-      const fb = item.reviewerFeedback || item.reviewerRecommendation || state.reviewFeedback || "No additional reviewer feedback.";
-      const p = document.createElement("p"); p.textContent = `Energicentrum feedback: ${fb}`; article.append(p);
-      const label=document.createElement("label");label.className="review-field";label.textContent="Implementation status";
-      const select=document.createElement("select");["Not started","Planned","In progress","Completed","Blocked"].forEach(s=>{const o=document.createElement("option");o.value=s;o.textContent=s;select.append(o);});select.value=item.implementationStatus;
-      select.addEventListener("change",()=>{item.implementationStatus=select.value;persist();});label.append(select);article.append(label);
-    }
-    container.append(article);
-  });
+function renderPlanItems(){
+ const container=document.getElementById("generatedActions"); container.innerHTML="";
+ if(!planItems.length){container.innerHTML='<div class="generated-action"><strong>No plan yet</strong><p>Answer all 14 questions, then select Generate action plan.</p></div>';return;}
+ planItems.forEach((a,i)=>{
+  const div=document.createElement("div");div.className="generated-action editable-action";
+  const linked=(a.sourceQuestions||[]).map(id=>`Q${id}`).join(", ");
+  div.innerHTML=`<div class="action-plan-title"><span class="priority ${a.priority.toLowerCase()}">${escapeHtml(a.priority)} PRIORITY</span><strong>${escapeHtml(a.title)}</strong></div><p class="source-questions">Combined from assessment: ${linked}</p><div class="action-edit-grid"><label>Action title<input data-field="title" data-index="${i}" value="${escapeHtml(a.title)}"></label><label>Priority<select data-field="priority" data-index="${i}"><option ${a.priority==='High'?'selected':''}>High</option><option ${a.priority==='Medium'?'selected':''}>Medium</option><option ${a.priority==='Low'?'selected':''}>Low</option></select></label><label class="wide">Recommended action<textarea data-field="action" data-index="${i}" rows="4">${escapeHtml(a.action)}</textarea></label><label class="wide">Practical toolkit / how to do it<textarea data-field="toolkit" data-index="${i}" rows="3">${escapeHtml(a.toolkit)}</textarea></label><label class="wide">Indicative cost breakdown (SEK)<textarea data-field="cost" data-index="${i}" rows="2">${escapeHtml(a.cost)}</textarea></label><label>Target in days<input type="number" min="1" max="730" data-field="deadline" data-index="${i}" value="${a.deadline}"></label><label>Reviewer / implementation note<textarea data-field="reviewNote" data-index="${i}" rows="2" placeholder="Notes from Energicentrum or provider">${escapeHtml(a.reviewNote||"")}</textarea></label></div><p class="cost-caveat">Costs are indicative estimates from the prototype, not supplier quotes. Confirm quantities, VAT, installation, site conditions and procurement costs.</p>`;
+  div.querySelectorAll("[data-field]").forEach(input=>input.addEventListener("change",()=>{const field=input.dataset.field;planItems[Number(input.dataset.index)][field]=input.value;saveDemoState();renderWorkflow();}));
+  container.appendChild(div);
+ });
 }
-function renderWorkflow() {
-  $("workflowStatusBadge").textContent = state.workflowStatus;
-  const answered = Object.keys(state.answers).length;
-  const avg = answered ? Object.values(state.answers).reduce((a,b)=>a+Number(b),0)/answered : 0;
-  $("planSummary").innerHTML = "";
-  [
-    ["Assessment score",answered ? `${avg.toFixed(1)} / 5` : "Not rated"],
-    ["Action packages",String(state.planItems.length)],
-    ["Workflow status",state.workflowStatus]
-  ].forEach(([label,value])=>{const d=document.createElement("div");d.className="summary-stat";const s=document.createElement("span");s.textContent=label;const b=document.createElement("strong");b.textContent=value;d.append(s,b);$("planSummary").append(d);});
-  renderPlanItems($("providerTab"),"provider");
-  renderPlanItems($("reviewerTab"),"reviewer");
-  renderPlanItems($("approvedTab"),"approved");
-  $("providerTab").prepend(makeStatusMessage(`Status: ${state.workflowStatus}. ${state.reviewFeedback ? "Reviewer feedback: "+state.reviewFeedback : "Submit the plan to send it into the demo review stage."}`));
-  $("reviewerTab").prepend(makeReviewerControls());
-  $("approvedTab").prepend(makeStatusMessage(state.workflowStatus === "Approved" ? "This plan has been approved in the demo. The provider can track implementation status below." : state.workflowStatus === "Changes requested" ? `Changes requested. Provider feedback: ${state.reviewFeedback || "See notes on individual actions."}` : `Current status: ${state.workflowStatus}. Approve or return the plan from the reviewer tab.`));
-  setActiveTab(activeTab);
+function saveDemoState(){
+ try{localStorage.setItem(demoStoreKey,JSON.stringify({propertyName:document.getElementById("propertyName").value,answers,evidence,planItems,workflowStatus,overallReviewText,activeRole,updatedAt:new Date().toISOString()}));}catch(e){}
 }
-function makeStatusMessage(text) { const d=document.createElement("div");d.className="status-message";d.textContent=text;return d; }
-function makeReviewerControls() {
-  const wrap=document.createElement("div");
-  const intro=document.createElement("p");intro.className="dialog-intro";intro.textContent="Energicentrum reviewer view · edit recommendations, provide feedback, and approve or return the plan.";wrap.append(intro);
-  const label=document.createElement("label");label.className="review-field";label.textContent="Overall reviewer feedback";
-  const textarea=document.createElement("textarea");textarea.value=state.reviewFeedback||"";textarea.placeholder="Summarise the review outcome and any changes required…";
-  textarea.addEventListener("change",()=>{state.reviewFeedback=textarea.value;persist();});label.append(textarea);wrap.append(label);
-  const actions=document.createElement("div");actions.className="review-actions";
-  const submit=makeButton("Submit plan to Energicentrum","button button-outline",()=>{
-    if (!state.planItems.length) return showToast("Generate an action plan first.");
-    state.workflowStatus="Submitted for review";persist();renderWorkflow();showToast("Plan submitted in this browser demo.");
-  });
-  const approve=makeButton("Approve plan ✓","button",()=>{
-    if (!state.planItems.length) return showToast("Generate an action plan first.");
-    state.workflowStatus="Approved";persist();renderWorkflow();showToast("Plan approved in the demo.");
-  });
-  const returnBtn=makeButton("Return for changes","button button-outline",()=>{
-    if (!state.planItems.length) return showToast("Generate an action plan first.");
-    if (!state.reviewFeedback.trim() && !state.planItems.some(x=>x.reviewerFeedback||x.reviewerRecommendation)) {
-      if (!confirm("No reviewer feedback has been entered. Return the plan anyway?")) return;
-    }
-    state.workflowStatus="Changes requested";persist();renderWorkflow();showToast("Plan returned for changes in the demo.");
-  });
-  actions.append(submit,approve,returnBtn);wrap.append(actions);return wrap;
+function loadDemoState(){
+ try{const d=JSON.parse(localStorage.getItem(demoStoreKey)||"null");if(!d)return;
+  if(d.propertyName)document.getElementById("propertyName").value=d.propertyName;
+  Object.assign(answers,d.answers||{});Object.assign(evidence,d.evidence||{});planItems=d.planItems||[];workflowStatus=d.workflowStatus||"Draft";overallReviewText=d.overallReviewText||"";activeRole=d.activeRole||"provider";
+ }catch(e){}
 }
-function makeButton(text, cls, onClick) { const b=document.createElement("button");b.type="button";b.className=cls;b.textContent=text;b.addEventListener("click",onClick);return b; }
-function setActiveTab(tab) {
-  activeTab=tab;
-  document.querySelectorAll(".tab-button").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
-  $("providerTab").hidden=tab!=="provider";$("reviewerTab").hidden=tab!=="reviewer";$("approvedTab").hidden=tab!=="approved";
+function renderWorkflow(){
+ const el=document.getElementById("workflowPanel"); if(!el)return;
+ const submitted=["Submitted for review","Under Energicentrum review","Returned for changes","Approved","Published"].includes(workflowStatus);
+ const isApproved=["Approved","Published"].includes(workflowStatus);
+ const tabs=`<div class="role-tabs" aria-label="Demo role navigation"><button class="${activeRole==='provider'?'active':''}" id="roleProvider">Housing provider</button><button class="${activeRole==='reviewer'?'active':''}" id="roleReviewer">Energicentrum reviewer</button><button class="${activeRole==='approved'?'active':''}" id="roleApproved">Provider · approved plan</button></div>`;
+ let body='';
+ if(activeRole==='provider'){
+  body=`<div class="workflow-head"><div><span class="card-kicker">HOUSING PROVIDER WORKSPACE</span><h3>${escapeHtml(document.getElementById("propertyName").value||"My property")}</h3><p>Review your consolidated draft before sending it to Energicentrum.</p></div><span class="status-pill">${escapeHtml(workflowStatus)}</span></div><div class="workflow-summary"><b>${planItems.length}</b><span>combined action packages</span><b>${scoreData().total}/28</b><span>provisional score</span></div><p class="workflow-note">Actions are grouped by improvement area, and each package lists the assessment questions that triggered it. Edit your draft above, then submit for review.</p><div class="workflow-buttons"><button class="button" id="submitPlan" ${planItems.length?'':'disabled'}>Submit plan to Energicentrum ↗</button><button class="button button-outline" id="exportPlan">Download plan JSON</button></div>${workflowStatus==='Returned for changes'?`<div class="review-feedback"><b>Energicentrum feedback</b><p>${escapeHtml(overallReviewText||'Please review the action notes and resubmit.')}</p></div>`:''}<p class="workflow-note">Demo mode: state is saved in this browser only. It is not shared with a separate Energicentrum account.</p>`;
+ } else if(activeRole==='reviewer'){
+  body=`<div class="workflow-head"><div><span class="card-kicker">ENERGICENTRUM · REVIEW QUEUE</span><h3>Review submitted action plan</h3><p>${escapeHtml(document.getElementById("propertyName").value||"My property")} · ${scoreData().total}/28 provisional points</p></div><span class="status-pill">${escapeHtml(workflowStatus)}</span></div>${!submitted?'<div class="review-feedback"><b>No submission in queue yet</b><p>Go to the Housing provider tab and submit the generated plan first. For this clickable demo, you can still preview the review actions below.</p></div>':''}<div class="reviewer-fields"><label>Overall review feedback<textarea id="overallReview" rows="3" placeholder="Explain approval, requested changes, or evidence still needed">${escapeHtml(overallReviewText)}</textarea></label></div><p class="workflow-note">Review each editable action above. Your edits, costs, toolkit suggestions and notes form the proposed final plan.</p><div class="workflow-buttons"><button class="button" id="approvePlan" ${submitted?"":"disabled"}>Approve plan ✓</button><button class="button button-outline" id="returnPlan" ${submitted?"":"disabled"}>Return to provider for changes</button><button class="button button-outline" id="exportPlan">Download review JSON</button></div><p class="workflow-note">Prototype limitation: reviewer permissions are simulated; this is not a secure administrator account.</p>`;
+ } else {
+  body=`<div class="workflow-head"><div><span class="card-kicker">HOUSING PROVIDER · FINAL PLAN</span><h3>${isApproved?'Energicentrum-approved action plan':'Approved plan preview'}</h3><p>${escapeHtml(document.getElementById("propertyName").value||"My property")}</p></div><span class="status-pill">${escapeHtml(workflowStatus)}</span></div>${isApproved?`<div class="approval-banner"><strong>✓ Approved by Energicentrum (demo)</strong><p>${escapeHtml(overallReviewText||'The action plan has been approved in this prototype.')}</p></div>`:'<div class="review-feedback"><b>Not approved yet</b><p>Submit the draft and use the Energicentrum reviewer tab to approve it. This screen will then show the approved version.</p></div>'}<div class="provider-final-actions">${planItems.map((a,i)=>`<article class="final-action"><div class="final-action-top"><span class="priority ${String(a.priority).toLowerCase()}">${escapeHtml(a.priority)} PRIORITY</span><span class="final-action-deadline">Target: ${escapeHtml(a.deadline)} days</span></div><h4>${escapeHtml(a.title)}</h4><p>${escapeHtml(a.action).replace(/\n/g,'<br>')}</p><div><b>Toolkit / how to implement</b><p>${escapeHtml(a.toolkit)}</p></div><div><b>Indicative cost (SEK)</b><p>${escapeHtml(a.cost)}</p></div>${a.reviewNote?`<div><b>Review / implementation note</b><p>${escapeHtml(a.reviewNote)}</p></div>`:''}<label class="progress-select">Implementation status<select data-progress="${i}"><option ${a.implementationStatus==='Not started'||!a.implementationStatus?'selected':''}>Not started</option><option ${a.implementationStatus==='In progress'?'selected':''}>In progress</option><option ${a.implementationStatus==='Completed'?'selected':''}>Completed</option><option ${a.implementationStatus==='Needs support'?'selected':''}>Needs support</option></select></label></article>`).join('')}</div><div class="workflow-buttons"><button class="button button-outline" id="exportPlan">Download final plan JSON</button></div><p class="workflow-note">This final-plan view is intended for the housing provider. It is not a householder portal. Demo approval does not constitute official Energicentrum approval.</p>`;
+ }
+ el.innerHTML=`${tabs}<div class="workflow-role-content">${body}</div>`;
+ document.getElementById("roleProvider").onclick=()=>{activeRole='provider';renderWorkflow();saveDemoState();};
+ document.getElementById("roleReviewer").onclick=()=>{activeRole='reviewer';workflowStatus=workflowStatus==='Submitted for review'?'Under Energicentrum review':workflowStatus;renderWorkflow();saveDemoState();};
+ document.getElementById("roleApproved").onclick=()=>{activeRole='approved';renderWorkflow();saveDemoState();};
+ const feedback=document.getElementById('overallReview');if(feedback)feedback.addEventListener('input',()=>{overallReviewText=feedback.value;saveDemoState();});
+ const submit=document.getElementById('submitPlan');if(submit)submit.onclick=()=>{workflowStatus='Submitted for review';activeRole='reviewer';renderWorkflow();saveDemoState();showToast('Submitted in the local demo. Switches to Energicentrum review.');};
+ const approve=document.getElementById('approvePlan');if(approve)approve.onclick=()=>{overallReviewText=document.getElementById('overallReview')?.value||overallReviewText;workflowStatus='Approved';activeRole='approved';renderWorkflow();saveDemoState();showToast('Plan approved in the clickable demo.');};
+ const ret=document.getElementById('returnPlan');if(ret)ret.onclick=()=>{overallReviewText=document.getElementById('overallReview')?.value||'';workflowStatus='Returned for changes';activeRole='provider';renderWorkflow();saveDemoState();showToast('Plan returned to the housing provider in the demo.');};
+ const exp=document.getElementById('exportPlan');if(exp)exp.onclick=()=>{const packet={propertyName:document.getElementById('propertyName').value,score:scoreData(),answers,evidence,actions:planItems,status:workflowStatus,reviewerFeedback:overallReviewText,createdAt:new Date().toISOString(),prototypeNotice:'Local clickable demonstration only. Not transmitted to Energicentrum.'};const blob=new Blob([JSON.stringify(packet,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='bike-friendly-action-plan.json';a.click();URL.revokeObjectURL(url);};
+ el.querySelectorAll('[data-progress]').forEach(sel=>{sel.value=sel.dataset.value||'Not started';sel.addEventListener('change',()=>{const i=Number(sel.dataset.progress);planItems[i].implementationStatus=sel.value;saveDemoState();showToast('Implementation progress updated in this browser.');});});
 }
-function openWorkflow() {
-  openAssessment();
-  if (!state.planItems.length) showToast("Complete the assessment and generate an action plan first.");
-  else { $("workflowPanel").hidden=false;renderWorkflow();$("workflowPanel").scrollIntoView({behavior:"smooth",block:"start"}); }
-}
-
-$("openProviderPortal").addEventListener("click",openProviderPortal);
-$("heroRegister").addEventListener("click",openProviderPortal);
-$("ctaRegister").addEventListener("click",openProviderPortal);
-$("openReviewerPortal").addEventListener("click",()=>{openAssessment();activeTab="reviewer";if(state.planItems.length){$("workflowPanel").hidden=false;renderWorkflow();$("workflowPanel").scrollIntoView({behavior:"smooth",block:"start"});}else showToast("Generate an action plan first to use the reviewer demo.");});
-$("closeProviderDialog").addEventListener("click",()=>closeDialog($("providerDialog")));
-$("cancelProviderRegistration").addEventListener("click",()=>closeDialog($("providerDialog")));
-$("closeProviderDashboard").addEventListener("click",()=>closeDialog($("providerDialog")));
-$("editProviderProfile").addEventListener("click",showRegistration);
-$("providerRegistrationForm").addEventListener("submit",e=>{
-  e.preventDefault();
-  profile={organisation:$("orgName").value.trim(),organisationType:$("orgType").value,properties:$("orgProperties").value,contact:$("orgContact").value.trim(),email:$("orgEmail").value.trim(),phone:$("orgPhone").value.trim(),municipality:$("orgLocation").value.trim()};
-  if(!persistProfile()) return;
-  showDashboard();showToast("Demo organisation profile saved.");
-});
-$("dashboardStartAssessment").addEventListener("click",()=>{
-  if(profile && !state.propertyName) state.propertyName=profile.organisation;
-  persist();closeDialog($("providerDialog"));openAssessment();
-});
-$("dashboardOpenWorkflow").addEventListener("click",()=>{closeDialog($("providerDialog"));openWorkflow();});
-$("startAssessment").addEventListener("click",openAssessment);
-$("openPlan").addEventListener("click",openWorkflow);
-$("closeAssessment").addEventListener("click",()=>closeDialog($("assessmentDialog")));
-$("saveAssessment").addEventListener("click",saveDraft);
-$("generatePlan").addEventListener("click",generatePlan);
-document.querySelectorAll(".tab-button").forEach(b=>b.addEventListener("click",()=>setActiveTab(b.dataset.tab)));
-$("menuToggle").addEventListener("click",()=>$("mainNav").classList.toggle("open"));
-$("mainNav").querySelectorAll("a").forEach(a=>a.addEventListener("click",()=>$("mainNav").classList.remove("open")));
-$("assessmentDialog").addEventListener("close",()=>persist());
-
+function openAssessment(){if(!dialog.open)dialog.showModal();}
+function showToast(message){toast.textContent=message;toast.classList.add("visible");clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove("visible"),3200);}
+["startTop","startHero","startAssessment","startBottom","openAssessment"].forEach(id=>document.getElementById(id).addEventListener("click",openAssessment));
+document.getElementById("closeDialog").addEventListener("click",()=>dialog.close());
+document.getElementById("showPlan").addEventListener("click",generatePlan);
+document.getElementById("propertyName").addEventListener("input",()=>saveDemoState());
+document.getElementById("resetAssessment").addEventListener("click",()=>{Object.keys(answers).forEach(k=>delete answers[k]);Object.keys(evidence).forEach(k=>delete evidence[k]);planItems=[];workflowStatus="Draft";activeRole="provider";overallReviewText="";renderQuestions();renderPlanItems();renderWorkflow();updateProgress();saveDemoState();showToast("Assessment reset.");});
+document.getElementById("menuToggle").addEventListener("click",()=>{const nav=document.getElementById("nav"),isOpen=nav.classList.toggle("open");document.getElementById("menuToggle").setAttribute("aria-expanded",String(isOpen));});
+document.querySelectorAll("#nav a").forEach(a=>a.addEventListener("click",()=>document.getElementById("nav").classList.remove("open")));
+loadDemoState();
 renderQuestions();
-updateDashboardStatuses();
-})();
+if(planItems.length){renderPlanItems();renderWorkflow();} else {renderWorkflow();}
