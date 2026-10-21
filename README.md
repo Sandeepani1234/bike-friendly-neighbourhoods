@@ -28,14 +28,17 @@ Every push to the selected branch will update the site after deployment.
 - Interactive 14-question assessment with 0/1/2 scores.
 - Completion progress and provisional score/star calculation.
 - Rule-based action-plan suggestions for answers scored 0 or 1.
+- Editable action titles, action descriptions, priorities, target dates, toolkit suggestions and indicative SEK cost ranges.
+- A demo Energicentrum review workflow with submit/review/approve/return status buttons and reviewer notes.
+- Export of the assessment and action plan as a JSON file for manual handover.
 - Evidence notes in the current browser session.
 - Clear labels that results are provisional and require human approval.
 
 ## Important limitations
 
-This is a **front-end demonstration**, not a production assessment platform. It does not include accounts, a real database, private evidence uploads, administrator permissions, server-enforced approval, durable saving, PDF exports, or secure publication workflow. The assessment lives only in the current page session and resets when the page is reloaded.
+This is a **front-end demonstration**, not a production assessment platform. It does not include accounts, a real database, private evidence uploads, administrator permissions, server-enforced approval, durable shared submissions, PDF exports, or secure publication workflow. The review buttons are a local demonstration only; they do not send the plan to Energicentrum, and browser data is not shared with another user. Download the JSON and hand it over manually for the current demo.
 
-GitHub Pages hosts static files only. To support real housing-provider accounts and Energicentrum's approval process, add a backend such as Supabase or another server/database service, configure authentication and row-level security, and implement approval rules on the server. Never store secret keys in front-end JavaScript.
+GitHub Pages hosts static files only. To support real housing-provider accounts and Energicentrum's approval process, add a backend such as Supabase or another server/database service, configure authentication and row-level security, store submissions centrally, and implement reviewer permissions and approval rules on the server. The SEK cost ranges are illustrative planning estimates, not supplier quotes; validate them locally before use. Never store secret keys in front-end JavaScript.
 
 The programme name, design, criteria, rating thresholds, action templates and cost guidance are prototype suggestions. Confirm them with Energicentrum before real-world use. No official endorsement or approval is implied.
 
