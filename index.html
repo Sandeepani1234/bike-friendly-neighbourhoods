@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#173f35">
+  <meta name="description" content="A practical programme helping housing providers make everyday cycling easier in Gotland.">
+  <title>Bike-Friendly Neighbourhoods — Gotland</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="#home" aria-label="Bike-Friendly Neighbourhoods home">
+      <span class="brand-mark" aria-hidden="true">↗</span>
+      <span><strong>BIKE-FRIENDLY</strong><small>NEIGHBOURHOODS · GOTLAND</small></span>
+    </a>
+    <button class="menu-toggle" id="menuToggle" aria-label="Open navigation" aria-expanded="false">☰</button>
+    <nav id="nav">
+      <a href="#how-it-works">How it works</a>
+      <a href="#criteria">Assessment</a>
+      <a href="#action-plan">Action plan</a>
+      <button class="button button-small" id="startTop">Start an assessment <span>↗</span></button>
+    </nav>
+  </header>
+
+  <main id="home">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> A practical sustainability programme</div>
+        <h1>Make everyday<br><em>cycling easier.</em></h1>
+        <p class="hero-lede">A better way to assess, improve and celebrate the places where people live — one neighbourhood at a time.</p>
+        <div class="hero-actions">
+          <button class="button" id="startHero">Start an assessment <span>↗</span></button>
+          <a class="text-link" href="#how-it-works">Discover the approach <span>↓</span></a>
+        </div>
+        <div class="hero-note"><span class="mini-icon">✳</span><span>Designed for housing providers in Gotland<br><b>Assess · Improve · Recognise</b></span></div>
+      </div>
+      <div class="hero-visual">
+        <div class="image-frame">
+          <img src="https://images.unsplash.com/photo-1511994298241-608e28f14fde?auto=format&fit=crop&w=1300&q=85" alt="Bicycle parked beside a leafy urban street" onerror="this.style.display='none';this.parentElement.classList.add('image-fallback')">
+          <div class="image-overlay"></div>
+          <div class="floating-card rating-card"><span class="card-kicker">YOUR NEXT STEP</span><div class="stars">★★★★★</div><strong>Room to improve.</strong><small>A clearer path to better cycling facilities.</small></div>
+          <div class="floating-card note-card"><span class="note-icon">↗</span><span><b>Small changes.</b><br><small>Everyday impact.</small></span></div>
+        </div>
+        <div class="hero-caption"><span>01 / A more cycle-friendly home</span><span>GOTLAND, SWEDEN</span></div>
+      </div>
+      <div class="hero-bottomline"><span>BETTER FACILITIES. BETTER EVERYDAY JOURNEYS.</span><span>SCROLL TO EXPLORE ↓</span></div>
+    </section>
+
+    <section class="stats-strip" aria-label="Programme principles">
+      <div><span class="stat-number">14</span><span class="stat-label">assessment questions</span></div>
+      <div><span class="stat-number">7</span><span class="stat-label">areas for improvement</span></div>
+      <div><span class="stat-number">1</span><span class="stat-label">clear action plan</span></div>
+      <p>Not just a rating.<br><b>A route to progress.</b></p>
+    </section>
+
+    <section class="section intro-section" id="how-it-works">
+      <div class="section-heading">
+        <div class="eyebrow">THE APPROACH</div>
+        <h2>From a quick assessment<br>to <em>meaningful action.</em></h2>
+      </div>
+      <p class="section-intro">Good cycling facilities don't happen by accident. This programme helps housing providers understand what works today and what to improve next.</p>
+      <div class="steps-grid">
+        <article class="step-card"><span class="step-number">01</span><div class="step-icon">⌕</div><h3>Assess</h3><p>Review the bicycle facilities residents can use, supported by observations and evidence.</p><span class="step-tag">UNDERSTAND TODAY</span></article>
+        <article class="step-card featured"><span class="step-number">02</span><div class="step-icon">↗</div><h3>Improve</h3><p>Turn gaps into a practical action plan with priorities, cost guidance and target dates.</p><span class="step-tag">PLAN THE NEXT STEP</span></article>
+        <article class="step-card"><span class="step-number">03</span><div class="step-icon">✳</div><h3>Get recognised</h3><p>Energicentrum reviews the evidence and approves the rating before it is published.</p><span class="step-tag">VERIFY THE PROGRESS</span></article>
+      </div>
+    </section>
+
+    <section class="assessment-section" id="criteria">
+      <div class="assessment-left">
+        <div class="eyebrow light">THE ASSESSMENT</div>
+        <h2>Better cycling starts<br>with the <em>right questions.</em></h2>
+        <p>Explore the seven areas used in this prototype assessment. Each question is scored against a simple, transparent scale.</p>
+        <div class="score-key"><span><b class="score-dot zero">0</b> Needs improvement</span><span><b class="score-dot one">1</b> Partly meets expectations</span><span><b class="score-dot two">2</b> Meets expectations</span></div>
+        <button class="button button-light" id="startAssessment">Try the assessment <span>↗</span></button>
+      </div>
+      <div class="criteria-list">
+        <div class="criterion-row"><span>01</span><b>Convenient bicycle parking</b><small>Capacity · Access</small><span class="criterion-arrow">↗</span></div>
+        <div class="criterion-row"><span>02</span><b>Security</b><small>Locking · Lighting</small><span class="criterion-arrow">↗</span></div>
+        <div class="criterion-row"><span>03</span><b>Weather protection & accessibility</b><small>Cover · Inclusive access</small><span class="criterion-arrow">↗</span></div>
+        <div class="criterion-row"><span>04</span><b>Bicycle maintenance</b><small>Repair tools · Reporting</small><span class="criterion-arrow">↗</span></div>
+        <div class="criterion-row"><span>05</span><b>Resident information</b><small>Information · Encouragement</small><span class="criterion-arrow">↗</span></div>
+        <div class="criterion-row"><span>06</span><b>Additional cycling support</b><small>Services · Feedback</small><span class="criterion-arrow">↗</span></div>
+        <div class="criterion-row"><span>07</span><b>Management & improvement</b><small>Ownership · Review</small><span class="criterion-arrow">↗</span></div>
+      </div>
+    </section>
+
+    <section class="section tool-section" id="action-plan">
+      <div class="tool-heading">
+        <div><div class="eyebrow">A PLAN YOU CAN ACT ON</div><h2>From gaps to <em>next steps.</em></h2></div>
+        <p>The prototype turns low-scoring answers into suggested actions. Recommendations are transparent and can be reviewed before approval.</p>
+      </div>
+      <div class="plan-preview">
+        <div class="plan-top"><div><span class="card-kicker">SAMPLE PROPERTY</span><h3>Seaside Courtyard <span class="demo-pill">DEMO</span></h3><p>Illustrative action plan · Not a real assessment</p></div><span class="status-pill"><span></span> Awaiting review</span></div>
+        <div class="plan-metrics"><div><small>PROVISIONAL SCORE</small><strong id="previewScore">18 / 28</strong></div><div><small>RATING</small><strong id="previewStars">★★★☆☆</strong></div><div><small>OPEN ACTIONS</small><strong id="previewActions">3</strong></div></div>
+        <div class="plan-action"><div class="priority high">HIGH PRIORITY</div><div class="action-copy"><h4>Review bicycle parking capacity</h4><p>Measure demand and occupancy before deciding whether more spaces are needed.</p></div><span class="action-date">Within 30 days</span></div>
+        <div class="plan-action"><div class="priority medium">MEDIUM</div><div class="action-copy"><h4>Introduce basic repair support</h4><p>Compare a pump-and-tool kit with a shared repair point.</p></div><span class="action-date">Within 60 days</span></div>
+        <div class="plan-action"><div class="priority low">LOW PRIORITY</div><div class="action-copy"><h4>Make facilities easier to discover</h4><p>Prepare a short guide for residents and new tenants.</p></div><span class="action-date">Within 30 days</span></div>
+        <div class="plan-footer"><span>Recommendations are suggestions until reviewed.</span><button class="text-link" id="openAssessment">Generate your own plan ↗</button></div>
+      </div>
+    </section>
+
+    <section class="approval-section">
+      <div class="approval-mark">✓</div>
+      <div><div class="eyebrow">TRUST THROUGH REVIEW</div><h2>A rating is only official<br>when it's <em>approved.</em></h2><p>The system can calculate a provisional score and suggest actions. Energicentrum retains control of review, approval and publication.</p></div>
+      <div class="approval-flow"><div><span>01</span>Provider submits</div><b>→</b><div><span>02</span>Review evidence</div><b>→</b><div><span>03</span>Approve & publish</div></div>
+    </section>
+
+    <section class="cta-section">
+      <div class="cta-orbit orbit-one"></div><div class="cta-orbit orbit-two"></div>
+      <div class="eyebrow light">YOUR NEIGHBOURHOOD, YOUR NEXT STEP</div>
+      <h2>Let's make cycling<br><em>easier for everyone.</em></h2>
+      <p>Start with what you have. Discover what could be better.</p>
+      <button class="button button-light" id="startBottom">Explore the assessment <span>↗</span></button>
+      <small>Prototype concept · Criteria and ratings require programme review before real-world use.</small>
+    </section>
+  </main>
+
+  <footer><a class="brand footer-brand" href="#home"><span class="brand-mark">↗</span><span><strong>BIKE-FRIENDLY</strong><small>NEIGHBOURHOODS · GOTLAND</small></span></a><p>A concept for a more cycle-friendly everyday life.</p><a href="#home">Back to top ↑</a></footer>
+
+  <dialog id="assessmentDialog" class="assessment-dialog">
+    <div class="dialog-header"><div><div class="eyebrow">INTERACTIVE PROTOTYPE</div><h2>Property assessment</h2></div><button class="close-dialog" id="closeDialog" aria-label="Close assessment">×</button></div>
+    <p class="dialog-intro">Use the scores below to explore how a provisional rating and action plan are generated. This demo does not save or submit data.</p>
+    <label class="property-label" for="propertyName">Property name</label><input id="propertyName" class="property-input" value="My neighbourhood" maxlength="80">
+    <div class="progress-wrap"><div class="progress-label"><span id="progressText">0 of 14 answered</span><span id="progressPercent">0%</span></div><div class="progress-track"><span id="progressBar"></span></div></div>
+    <div id="questionList" class="question-list"></div>
+    <div class="result-panel" id="resultPanel">
+      <div class="result-top"><div><span class="card-kicker">PROVISIONAL RESULT</span><h3 id="resultRating">Not yet rated</h3><p id="resultSummary">Answer all questions to calculate a provisional rating.</p></div><div class="result-score" id="resultScore">—<small>/ 28</small></div></div>
+      <div id="generatedActions" class="generated-actions"></div>
+      <p class="demo-warning">Prototype only. This result is not an official rating. Energicentrum review and approval would be required before publication.</p>
+    </div>
+    <div class="dialog-footer"><button class="button button-outline" id="resetAssessment">Reset answers</button><button class="button" id="showPlan">Generate action plan <span>↗</span></button></div>
+  </dialog>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="app.js"></script>
+</body>
+</html>
